@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - ../group_vars/global_vars.yml
+
+  tasks:
+    - name: SSL renew
+      shell: certbot renew --pre-hook "service nginx stop" --post-hook "service nginx start"

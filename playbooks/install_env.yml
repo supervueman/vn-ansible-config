@@ -1,0 +1,106 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+
+  vars_files:
+    - ../group_vars/global_vars.yml
+
+  tasks:
+    - name: Install the gpg key for nodejs LTS
+      apt_key:
+        url: 'https://deb.nodesource.com/gpgkey/nodesource.gpg.key'
+        state: present
+      register: inistall_gpg_nodejs_lts
+
+    - name: Install the nodejs LTS repos
+      apt_repository:
+        repo: 'deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main'
+        state: present
+        update_cache: yes
+      register: inistall_nodejs_lts_repos
+      when: inistall_gpg_nodejs_lts.changed
+
+    - name: 'APT: Install aptitude package'
+      apt:
+        name: aptitude
+      register: inistall_aptitude_package
+      when: inistall_nodejs_lts_repos.changed
+
+    - name: install node
+      shell: |
+        curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && sudo apt-get install -y nodejs
+      register: inistall_node_js
+      when: inistall_aptitude_package.changed
+
+    - name: Install pm2
+      npm: name=pm2 global=yes production=yes
+
+    - name: Install serve server
+      npm: name=serve global=yes production=yes
+      when: inistall_aptitude_package.changed
+
+    - name: Ensure bash, OpenSSl, and libssl are the latest versions
+      apt: name={{ item }} update_cache=true state=latest
+      with_items:
+        - bash
+        - openssl
+        - libssl-dev
+        - libssl-doc
+        # Postgres packages
+        - postgresql
+        - postgresql-contrib
+        - libpq-dev
+        - python-psycopg2
+        # Deploy packages
+        - build-essential
+        - git
+        - mcrypt
+        - curl
+      tags: packages
+      register: inistall_postgres
+      when: inistall_aptitude_package.changed
+
+    - name: Ensure the PostgreSQL service is running
+      service: name=postgresql state=started enabled=yes
+      register: start_postgres
+      when: inistall_postgres.changed
+
+    - name: Ensure database is created
+      sudo_user: postgres
+      postgresql_db: name={{ db_name }}
+        encoding='UTF8'
+        lc_collate='en_US.UTF8'
+        lc_ctype='en_US.UTF8'
+        template='template0'
+        state=present
+      register: create_db
+      # when: inistall_postgres.changed
+
+      # when: start_postgres.changed
+    - name: Ensure user has access to the database
+      sudo_user: postgres
+      postgresql_user: db={{ db_name }}
+        name={{ db_user }}
+        password={{ db_password }}
+        priv=ALL
+        state=present
+      register: create_postgres_user
+      when: create_db.changed
+
+    - name: Ensure user does not have unnecessary privileges
+      sudo_user: postgres
+      postgresql_user: name={{ db_user }}
+        role_attr_flags=NOSUPERUSER,NOCREATEDB
+        state=present
+      register: set_privileges_postgres_user
+      when: create_postgres_user.changed
+
+    - name: Ensure nginx is at the latest version
+      apt: name=nginx state=latest
+
+    - name: Start nginx
+      service:
+        name: nginx
+        state: started
+      when: set_privileges_postgres_user.changed

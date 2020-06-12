@@ -1,0 +1,29 @@
+---
+home_dir: /var/www # folder with project
+app_dir: pr_app # project folder
+repo_admin_panel: platform-cms
+account_admin_panel: MultiCms
+repo_client: pr_fbk
+account_client: multikey
+
+private_key: /Users/<%username%>/.ssh/id_rsa
+
+# For environment
+NODEJS_VERSION: '12'
+ansible_distribution_release: 'xenial' #trusty
+
+# Database variables
+db_user: app_user
+db_name: app_db
+db_password: app_password
+
+backup_dir: app_backup
+
+certbot_create_method: standalone
+certbot_admin_email: app@gmail.com
+certbot_create_stop_services:
+  - nginx
+
+domains:
+  - { servername: 'api.app.com' }
+  - { servername: 'manager.app.com' }

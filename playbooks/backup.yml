@@ -1,0 +1,75 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - ../group_vars/global_vars.yml
+
+  tasks:
+    - name: Create backup directory
+      shell: mkdir {{backup_dir}}
+      args:
+        chdir: ../{{home_dir}}
+      register: create_backup_directory
+
+    - name: Copy server env file
+      shell: cp {{ app_dir }}/admin-panel/server/.env ./{{backup_dir}}/server.env
+      args:
+        chdir: ../{{home_dir}}
+      register: copy_server_env_file
+      when: create_backup_directory.changed
+
+    - name: Copy manager env file
+      shell: cp {{ app_dir }}/admin-panel/manager_dev/.env ./{{backup_dir}}/manager.env
+      args:
+        chdir: ../{{home_dir}}
+      register: copy_manager_env_file
+      when: copy_server_env_file.changed
+
+    - name: Copy client env file
+      shell: cp {{ app_dir }}/client/.env ./{{backup_dir}}/client.env
+      args:
+        chdir: ../{{home_dir}}
+      register: copy_client_env_file
+      when: copy_manager_env_file.changed
+
+    - name: Copy files
+      shell: cp -r {{ app_dir }}/admin-panel/files ./{{backup_dir}}/files
+      args:
+        chdir: ../{{home_dir}}
+      register: copy_files
+      when: copy_client_env_file.changed
+
+    - name: Create sites-available directory in backup directory
+      shell: cd ./{{backup_dir}} && mkdir nginx && cd nginx && mkdir sites-available
+      args:
+        chdir: ../{{home_dir}}
+      register: create_sites_available_directory
+      when: copy_files.changed
+
+    - name: Copy nginx configs
+      shell: cp -r ../../etc/nginx/sites-available ./{{backup_dir}}/nginx && cp -r ../../etc/nginx/nginxconfig.io ./{{backup_dir}}/nginx && cp -r ../../etc/nginx/nginx.conf ./{{backup_dir}}/nginx
+      args:
+        chdir: ../{{home_dir}}
+      register: copy_nginx_configs
+      when: create_sites_available_directory.changed
+
+    - name: Dump db
+      shell: pg_dump -h localhost -U fbk_man -F c -f ./{{backup_dir}}/dump_db.tar.gz fbk_db
+      args:
+        chdir: ../{{home_dir}}
+      register: dump_db
+      when: copy_nginx_configs.changed
+
+    - name: Gzip backup
+      shell: tar -cf ./{{backup_dir}}.tar.gz ./{{backup_dir}}
+      args:
+        chdir: ../{{home_dir}}
+      register: gzip_backup
+      when: dump_db.changed
+
+    - name: Remove unzip backup directory
+      shell: rm -r ./{{backup_dir}}
+      args:
+        chdir: ../{{home_dir}}
+      when: gzip_backup.changed

@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - ../group_vars/global_vars.yml
+
+  tasks:
+    - name: Stop APP
+      command: npm run app:stop:pm2 chdir={{home_dir}}/{{app_dir}}/admin-panel
+      ignore_errors: yes

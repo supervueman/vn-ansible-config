@@ -1,0 +1,20 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - ../group_vars/global_vars.yml
+
+  tasks:
+    - name: Create APP Directory
+      file: path={{home_dir}}/{{app_dir}} state=directory
+
+    - name: Copy Private Key
+      copy: src={{private_key}} dest={{home_dir}} mode=0600
+
+    - name: Git Clone Repo
+      git: repo=git@gitlab.com:{{account_admin_panel}}/{{repo_admin_panel}}.git dest={{home_dir}}/{{app_dir}}/admin-panel update=yes force=yes accept_hostkey=yes key_file={{home_dir}}/id_rsa
+      register: git_finished
+
+    - name: Create APP Directory files
+      file: path={{home_dir}}/{{app_dir}}/admin-panel/files state=directory
