@@ -1,15 +1,15 @@
 ---
 home_dir: /var/www # folder with project
-app_dir: pr_app # project folder
-repo_admin_panel: platform-cms
-account_admin_panel: MultiCms
-repo_client: pr_fbk
-account_client: multikey
+app_dir: app # project folder
+
+git_service: gitlab
+git_account_name: app_account
+git_repository_name: app
 
 private_key: /Users/<%username%>/.ssh/id_rsa
 
 # For environment
-NODEJS_VERSION: '12'
+node_version: '12'
 ansible_distribution_release: 'xenial' #trusty
 
 # Database variables
@@ -25,5 +25,6 @@ certbot_create_stop_services:
   - nginx
 
 domains:
-  - { servername: 'api.app.com' }
-  - { servername: 'manager.app.com' }
+  - { domain: 'api.app.com' }
+  - { domain: 'manager.app.com' }
+  - { domain: 'app.com' }

@@ -10,22 +10,22 @@
       stat:
         path: /etc/letsencrypt/live/{{ item.servername }}/cert.pem
       register: letsencrypt_cert
-      with_items: '{{ domains }}'
+      with_items: { { domains } }
 
     - name: Stop services to allow certbot to generate a cert.
       service:
-        name: '{{ item }}'
+        name: { { item } }
         state: stopped
       with_items:
-        - '{{ certbot_create_stop_services }}'
+        - { { certbot_create_stop_services } }
 
     - name: Generate new certificate if one doesn't exist.
-      shell: 'certbot certonly --{{certbot_create_method}} --noninteractive --agree-tos --email {{ certbot_admin_email }} -d {{ item.item.servername }}'
-      with_items: '{{ letsencrypt_cert.results }}'
+      shell: certbot certonly --{{certbot_create_method}} --noninteractive --agree-tos --email {{ certbot_admin_email }} -d {{ item.item.domain }}
+      with_items: { { letsencrypt_cert.results } }
       when: item.stat.exists == False
 
     - name: Start services after cert has been generated.
       service:
-        name: '{{ item }}'
+        name: { { item } }
         state: started
-      with_items: '{{ certbot_create_stop_services }}'
+      with_items: { { certbot_create_stop_services } }
