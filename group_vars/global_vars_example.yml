@@ -1,4 +1,10 @@
 ---
+# For environment
+node_version: '12'
+node_distribution_release: 'xenial' #trusty
+
+postgresql_version: 12
+
 home_dir: /var/www # folder with project
 app_dir: app # project folder
 
@@ -7,10 +13,6 @@ git_account_name: app_account
 git_repository_name: app
 
 private_key: /Users/<%username%>/.ssh/id_rsa
-
-# For environment
-node_version: '12'
-ansible_distribution_release: 'xenial' #trusty
 
 # Database variables
 db_user: app_user
