@@ -17,6 +17,7 @@
           - python2
           - wget
           - python3-psycopg2
+          - certbot
 
     - name: Add the gpg key for nodejs LTS
       register: add_gpg_nodejs_lts
@@ -49,15 +50,8 @@
       ignore_errors: True
       npm: name=serve global=yes production=yes
 
-    - name: Add gpg key and postgresql repository
-      register: add_postgres_gpg_key_and_repositoty
-      when: install_common_packages.changed
-      shell: |
-        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -s
-
     - name: Add content repository to system
       register: add_content_repository_to_system
-      when: add_postgres_gpg_key_and_repositoty.changed or add_postgres_gpg_key_and_repositoty.skipped
       shell: |
         echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
 
@@ -69,17 +63,9 @@
           - postgresql-{{postgresql_version}}
           - postgresql-client-{{postgresql_version}}
 
-    - name: Ensure the PostgreSQL service is running
-      register: start_postgres
-      when: install_postgres.changed
-      service: name=postgresql state=started enabled=yes
-      ignore_errors: True
-
     - name: Create database
       register: create_database
-      when:
-        - install_postgres.changed
-        - start_postgres.changed or start_postgres.skipped
+      when: install_postgres.changed
       sudo_user: postgres
       postgresql_db:
         name: '{{ db_name }}'
@@ -109,7 +95,6 @@
         role_attr_flags: NOSUPERUSER,NOCREATEDB
         state: present
 
-    # Install nginx
     - name: Install nginx
       apt:
         name: nginx
