@@ -2,3 +2,4 @@ global_vars.yml
 servers.yml
 hosts.txt
 .git
+.DS_Store
