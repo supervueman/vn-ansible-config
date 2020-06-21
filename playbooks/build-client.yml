@@ -6,18 +6,10 @@
     - ../group_vars/global_vars.yml
 
   tasks:
-    # - name: Running NPM for remove client symlink
-    #   command: npm run client:dev:remove:symlink chdir={{home_dir}}/{{app_dir}}/admin-panel
-    #   register: npm_finished_remove_symlink
-
     - name: Running NPM build client
-      command: npm run client:build chdir={{home_dir}}/{{app_dir}}/admin-panel
       register: npm_finished_build_client
-    # when: npm_finished_remove_static_folder.changed
-    # - name: Running NPM for create client static folder
-    #   command: mkdir static chdir={{home_dir}}/{{app_dir}}/client
-    #   register: npm_finished_create_static_folder
-    #   when: npm_finished_build_client.changed
-    # - name: Running NPM for create client symlink
-    #   command: npm run client:dev:create:symlink chdir={{home_dir}}/{{app_dir}}/admin-panel
-    # when: npm_finished_create_static_folder.changed
+      command: npm run client:build chdir={{home_dir}}/{{app_dir}}
+
+    - name: Running NPM for create client symlink
+      when: npm_finished_build_client.changed
+      command: npm run client:create:symlink chdir={{home_dir}}/{{app_dir}}
