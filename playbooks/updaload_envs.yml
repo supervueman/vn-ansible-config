@@ -1,0 +1,25 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - ../group_vars/global_vars.yml
+
+  tasks:
+    - name: Copy env for client
+      copy:
+        src: ../env/client/.env
+        dest: ../{{home_dir}}/{{app_dir}}/client
+        mode: '777'
+
+    - name: Copy env for manager_dev
+      copy:
+        src: ../env/manager_dev/.env
+        dest: ../{{home_dir}}/{{app_dir}}/manager_dev
+        mode: '777'
+
+    - name: Copy env for server
+      copy:
+        src: ../env/server/.env
+        dest: ../{{home_dir}}/{{app_dir}}/server
+        mode: '777'

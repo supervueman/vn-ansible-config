@@ -3,3 +3,4 @@ servers.yml
 hosts.txt
 .git
 .DS_Store
+.env
