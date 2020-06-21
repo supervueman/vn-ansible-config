@@ -7,9 +7,10 @@
 
   tasks:
     - name: Running NPM build manager
-      command: npm run manager:build chdir={{home_dir}}/{{app_dir}}/admin-panel
       register: npm_finished_build_manager
+      command: npm run manager:build chdir={{home_dir}}/{{app_dir}}
 
     - name: Running NPM create symlink manager
-      command: npm run manager:prod:create:symlink chdir={{home_dir}}/{{app_dir}}/admin-panel
       when: npm_finished_build_manager.changed
+      ignore_errors: True
+      command: npm run manager:create:symlink chdir={{home_dir}}/{{app_dir}}
