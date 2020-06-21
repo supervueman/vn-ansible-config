@@ -7,4 +7,4 @@
 
   tasks:
     - name: Running NPM create symlink manager
-      command: npm run manager:prod:create:symlink chdir={{home_dir}}/{{app_dir}}/admin-panel
+      command: npm run manager:create:symlink chdir={{home_dir}}/{{app_dir}}

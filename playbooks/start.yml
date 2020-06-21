@@ -7,5 +7,5 @@
 
   tasks:
     - name: Start APP
-      command: npm run app:start:pm2 chdir={{home_dir}}/{{app_dir}}/admin-panel
+      command: npm run app:start:pm2 chdir={{home_dir}}/{{app_dir}}
       ignore_errors: yes

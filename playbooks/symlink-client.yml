@@ -7,4 +7,4 @@
 
   tasks:
     - name: Running NPM create symlink client
-      command: npm run client:dev:create:symlink chdir={{home_dir}}/{{app_dir}}/admin-panel
+      command: npm run client:create:symlink chdir={{home_dir}}/{{app_dir}}
