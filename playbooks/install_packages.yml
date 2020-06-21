@@ -7,13 +7,16 @@
 
   tasks:
     - name: Running NPM install server
-      npm: path={{home_dir}}/{{app_dir}}/admin-panel/server
       register: npm_finished_server
+      ignore_errors: True
+      npm: path={{home_dir}}/{{app_dir}}/server
 
     - name: Running NPM install manager_dev
-      npm: path={{home_dir}}/{{app_dir}}/admin-panel/manager_dev
       register: npm_finished_manager_dev
+      ignore_errors: True
+      npm: path={{home_dir}}/{{app_dir}}/manager_dev
 
     - name: Running NPM install client
-      npm: path={{home_dir}}/{{app_dir}}/client
       register: npm_finished_client
+      ignore_errors: True
+      npm: path={{home_dir}}/{{app_dir}}/client
