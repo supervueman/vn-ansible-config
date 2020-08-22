@@ -4,3 +4,4 @@ hosts.txt
 .git
 .DS_Store
 .env
+nginx
